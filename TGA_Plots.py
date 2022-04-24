@@ -11,6 +11,7 @@ import re
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
@@ -95,44 +96,40 @@ H2O_sig = np.array(df.loc[:,'Ion Current'])
 H2O_T = np.array(df.loc[:,'Temperature'])
 
 # Plotting
-fig, ax = plt.subplots() #size is in inches
-plt.title(Graph_Title[index])
-ax.plot(TGA_T,TGA_M, linewidth=lnthikness, color=ColPal[1])    
-ax.set_xlabel("Temperature (°C)", fontsize=9)
-ax.set_ylabel("Weight (%)", fontsize=9, color=ColPal[1])
-ax.tick_params(axis='x', labelsize=8)
-ax.xaxis.set_major_locator(MultipleLocator(100))
-ax.xaxis.set_minor_locator(MultipleLocator(25))
-ax.tick_params(axis='y', labelsize=8, colors=ColPal[1])
-ax.set_xlim([30,1000])
-ax.set_ylim([60,100])
+fig = plt.figure(constrained_layout=True)
+gs = fig.add_gridspec(3, 1)
 
-ax2=ax.twinx()
+ax1 = fig.add_subplot(gs[:-1, :])
+ax1.set_title(Graph_Title[index])
+ax1.plot(TGA_T,TGA_M, linewidth=lnthikness, color=ColPal[1])    
+
+ax1.set_ylabel("Weight (%)", fontsize=9, color=ColPal[1])
+ax1.tick_params(axis='x', labelsize=8)
+ax1.xaxis.set_major_locator(MultipleLocator(100))
+ax1.xaxis.set_minor_locator(MultipleLocator(25))
+ax1.tick_params(axis='y', labelsize=8, colors=ColPal[1])
+ax1.set_xlim([30,1000])
+ax1.set_ylim([60,100])
+
+# Add second y-axis and plot dM
+ax2=ax1.twinx()
 ax2.plot(TGA_T,TGA_dM, linewidth=lnthikness, color=ColPal[0])
 ax2.tick_params(axis='y', labelsize=8, colors=ColPal[0])
 ax2.set_ylabel("Derivitave Weight (% / °C)", fontsize=9, color=ColPal[0])
 ax2.set_ylim([-.3,.3])
 
-# ax[1].plot(TGA_T,TGA_dM, linewidth=lnthikness)  
+#Add second plot with MS data
+ax3 = fig.add_subplot(gs[-1, :]) 
+ax3.plot(H2O_T, H2O_sig , linewidth=lnthikness, color=ColPal[2])
+ax3.plot(CO2_T, CO2_sig , linewidth=lnthikness, color=ColPal[3])
+ax3.set_xlim([30,1000])
+ax3.set_xlabel("Temperature (°C)", fontsize=9)
+ax3.tick_params(axis='x', labelsize=8)
+ax3.xaxis.set_major_locator(MultipleLocator(100))
+ax3.xaxis.set_minor_locator(MultipleLocator(25))
+ax3.tick_params(axis='y', labelsize=8)
+ax3.set_ylabel("Ion Current (mA)", fontsize=9)
 
-
-
-# # Hide x labels and tick labels for all but bottom plot.
-# for ax in axs:
-#     ax.label_outer()
-    
-    # ax.set_xlim(ylimits)
-    # # ax.set_ylim(xlimits)
-    # ax.xaxis.set_minor_locator(MultipleLocator(2.5))
-    # ax.yaxis.set_ticklabels([])
-    # ax.tick_params(axis='y',length=0)
-    # plt.title(plt_title)
-    # # ax.legend()
-    # #Revers order of legend lables
-    # handles, labels = ax.get_legend_handles_labels()
-    # ax.legend(handles[::-1], labels[::-1])
-
-    # svg_name_path = 'Plots/' + svg_file_name + '.svg'
     # # Uncomment this line to save the figure.
     # fig.savefig(svg_name_path, transparent=False, bbox_inches="tight")
     # return fig
