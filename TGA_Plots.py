@@ -72,6 +72,7 @@ for x in TGA_MS_count:
 ColPal = ['#256676', '#1f0133', '#696fc4', '#9b1b5c']
 lnthikness= 1
 legspot = 'upper right' # Determines where legend is placed
+Wt_loss_dat = []
 
 def Plot_TGA_MS(index):
     font = FontProperties()
@@ -87,12 +88,14 @@ def Plot_TGA_MS(index):
     # TGA_dM = TGA_dM[:,0] # gits rid of repeated dM data
     inx30 = next(x for x, val in enumerate(TGA_T)
                                   if val >= 30 )
+    print(Graph_Title[index])
     print("index at 30C ", inx30)
     print("mass percent at 30C ", TGA_M[inx30])
     norFact= 100 / TGA_M[inx30]
     print(norFact)
-    wtLoss = 100 - TGA_M[-1] * norFact
-    print("weight loss form 30 to 1000C", wtLoss, "%")
+    wtloss = 100 - TGA_M[-1] * norFact
+    print("weight loss form 30 to 1000C", wtloss, "%")
+    Wt_loss_dat.append(float(wtloss))
 
     #Get MS Data
     df = MS_CO2_listOdf[index]
@@ -102,7 +105,7 @@ def Plot_TGA_MS(index):
     H2O_sig = np.array(df.loc[:,'Ion Current'])
     H2O_T = np.array(df.loc[:,'Temperature'])
 
-    # Plotting
+    #Plotting
     fig = plt.figure(figsize=[7.08, 6] ,constrained_layout=True)
     gs = fig.add_gridspec(4, 1)
 
@@ -139,10 +142,16 @@ def Plot_TGA_MS(index):
     ax3.tick_params(axis='y', labelsize=8)
     ax3.set_ylabel("Ion Current (mA)", fontsize=9)
     ax3.legend(["18 AMU ($H_2O$)", "44 AMU ($CO_2 $)"],loc='upper right')
-
+    
+    svg_name_path = 'Plots/'+ Graph_Title[index] + '.svg'
     # # Uncomment this line to save the figure.
     # fig.savefig(svg_name_path, transparent=False, bbox_inches="tight")
     return fig
 #%%
 
-Plot_TGA_MS(1)
+for x in TGA_MS_count:
+    Plot_TGA_MS(x)
+    
+wt_loss_dictionary = {"File" : TGA_names, "Name" : Graph_Title, "Weight Loss (%)" : Wt_loss_dat}
+wt_loss_df = pd.DataFrame(wt_loss_dictionary)
+wt_loss_df.to_csv('Plots/weight_loss_table.csv', index=False)
