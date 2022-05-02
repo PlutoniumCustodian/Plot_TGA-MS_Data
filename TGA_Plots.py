@@ -73,7 +73,7 @@ ColPal = ['#256676', '#1f0133', '#696fc4', '#9b1b5c']
 lnthikness= 1
 legspot = 'upper right' # Determines where legend is placed
 Wt_loss_dat = []
-
+Wt_loss_dat2 = []
 def Plot_TGA_MS(index):
     font = FontProperties()
     font.set_family('sans-serf')
@@ -85,9 +85,15 @@ def Plot_TGA_MS(index):
     TGA_T = np.array(df.loc[:,'Temperature'])
     TGA_M = np.array(df.loc[:,'Weight'])
     TGA_dM = np.array(df.loc[:,'Deriv. Weight'])
-    # TGA_dM = TGA_dM[:,0] # gits rid of repeated dM data
+
+    
+    # find index of first time T reaches 30C
     inx30 = next(x for x, val in enumerate(TGA_T)
                                   if val >= 30 )
+    # find index of first time T reaches 105C
+    inx105 = next(x for x, val in enumerate(TGA_T)
+                                  if val >= 105 )
+    
     print(Graph_Title[index])
     print("index at 30C ", inx30)
     print("mass percent at 30C ", TGA_M[inx30])
@@ -96,8 +102,10 @@ def Plot_TGA_MS(index):
     wtloss = 100 - TGA_M[-1] * norFact
     print("weight loss form 30 to 1000C", wtloss, "%")
     Wt_loss_dat.append(float(wtloss))
+    stru_wt_loss = ( TGA_M[inx105] - TGA_M[-1]) * norFact
+    Wt_loss_dat2.append(float(stru_wt_loss))
 
-    #Get MS Data
+    # #Get MS Data
     df = MS_CO2_listOdf[index]
     CO2_sig = np.array(df.loc[:,'Ion Current'])
     CO2_T = np.array(df.loc[:,'Temperature'])
@@ -115,8 +123,8 @@ def Plot_TGA_MS(index):
 
     ax1.set_ylabel("Weight (%)", fontsize=9, color=ColPal[1])
     ax1.tick_params(axis='x', labelsize=8)
-    ax1.xaxis.set_major_locator(MultipleLocator(100))
-    ax1.xaxis.set_minor_locator(MultipleLocator(25))
+    ax1.xaxis.set_major_locator(MultipleLocator(200))
+    ax1.xaxis.set_minor_locator(MultipleLocator(50))
     ax1.tick_params(axis='y', labelsize=8, colors=ColPal[1])
     ax1.set_xlim([30,1000])
     ax1.set_ylim([60,100])
@@ -141,7 +149,7 @@ def Plot_TGA_MS(index):
     ax3.xaxis.set_minor_locator(MultipleLocator(25))
     ax3.tick_params(axis='y', labelsize=8)
     ax3.set_ylabel("Ion Current (mA)", fontsize=9)
-    ax3.legend(["18 AMU ($H_2O$)", "44 AMU ($CO_2 $)"],loc='upper right')
+    ax3.legend(["18 AMU ($H_2O$)", "44 AMU ($CO_2 $)"],loc='upper right', fontsize=9)
     
     svg_name_path = 'Plots/'+ Graph_Title[index] + '.svg'
     # # Uncomment this line to save the figure.
@@ -152,6 +160,7 @@ def Plot_TGA_MS(index):
 for x in TGA_MS_count:
     Plot_TGA_MS(x)
     
-wt_loss_dictionary = {"File" : TGA_names, "Name" : Graph_Title, "Weight Loss (%)" : Wt_loss_dat}
+wt_loss_dictionary = {"File" : TGA_names, "Name" : Graph_Title, "Weight Loss 30-1000C (%)" : Wt_loss_dat
+, "Weight Loss 105-1000C (%)" : Wt_loss_dat2}
 wt_loss_df = pd.DataFrame(wt_loss_dictionary)
 wt_loss_df.to_csv('Plots/weight_loss_table.csv', index=False)
